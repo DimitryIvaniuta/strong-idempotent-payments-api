@@ -1,0 +1,130 @@
+{
+  "info": {
+    "name": "Strong Idempotent Payments API",
+    "_postman_id": "042506e4-7bd1-460e-a773-0eb3050d197c",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Demonstrates strong idempotency: X-Idempotency-Key + request hash with response replay."
+  },
+  "item": [
+    {
+      "name": "Charge - create (new key)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('idempotencyKey', 'idem-' + pm.variables.replaceIn('{{$guid}}'));",
+              "pm.environment.set('correlationId', 'corr-' + pm.variables.replaceIn('{{$guid}}'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Idempotency-Key",
+            "value": "{{idempotencyKey}}"
+          },
+          {
+            "key": "X-Correlation-Id",
+            "value": "{{correlationId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/payments/charges",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "charges"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": \"cust_postman\",\n  \"amount\": 1099,\n  \"currency\": \"PLN\",\n  \"paymentMethodToken\": \"pm_tok_demo\",\n  \"description\": \"Postman demo charge\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Charge - replay (same key, same body)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Idempotency-Key",
+            "value": "{{idempotencyKey}}"
+          },
+          {
+            "key": "X-Correlation-Id",
+            "value": "{{correlationId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/payments/charges",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "charges"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": \"cust_postman\",\n  \"amount\": 1099,\n  \"currency\": \"PLN\",\n  \"paymentMethodToken\": \"pm_tok_demo\",\n  \"description\": \"Postman demo charge\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Charge - conflict (same key, different body)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Idempotency-Key",
+            "value": "{{idempotencyKey}}"
+          },
+          {
+            "key": "X-Correlation-Id",
+            "value": "{{correlationId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/payments/charges",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "charges"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": \"cust_postman\",\n  \"amount\": 2099,\n  \"currency\": \"PLN\",\n  \"paymentMethodToken\": \"pm_tok_demo\",\n  \"description\": \"Different amount => hash mismatch\"\n}"
+        }
+      },
+      "response": []
+    }
+  ]
+}
