@@ -1,0 +1,69 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.10'
+}
+
+group = 'com.github.dimitryivaniuta.gateway'
+version = '0.1.0'
+description = 'Strong Idempotent Payments API (anti double-charge) with request-hash + response replay and outbox publisher.'
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    bootBom = '3.5.10'
+    lombokVersion = '1.18.42'
+    testcontainersBom = '1.21.4'
+    jsonwebtoken = '0.13.0'
+}
+
+dependencies {
+    implementation "org.apache.commons:commons-compress:1.28.0"
+    implementation "org.assertj:assertj-core:3.27.7"
+    // Spring Boot BOM (versions for starters/flyway/postgres/kafka)
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${bootBom}")
+    testImplementation platform("org.springframework.boot:spring-boot-dependencies:${bootBom}")
+
+    // Testcontainers BOM (single source of truth)
+    testImplementation platform("org.testcontainers:testcontainers-bom:${testcontainersBom}")
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly  'org.postgresql:postgresql'
+
+
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // --- Lombok ---
+    compileOnly         "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly     "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
