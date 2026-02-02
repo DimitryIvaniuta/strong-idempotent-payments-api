@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: strong-idempotent-payments-api
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5455/payments}
+    username: ${DB_USER:payments}
+    password: ${DB_PASSWORD:payments}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+
+  kafka:
+    # docker-compose maps host 9098 -> container 9092 and advertises localhost:9098
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9098}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        acks: all
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6384}
+
+  cache:
+    type: redis
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+app:
+  idempotency:
+    charge-scope: ${IDEMPOTENCY_CHARGE_SCOPE:payments:charge}
+    stale-in-progress-after: ${IDEMPOTENCY_STALE_IN_PROGRESS_AFTER:PT30S}
+  outbox:
+    payments-events-topic: ${PAYMENTS_EVENTS_TOPIC:payments-events}
+    publish-interval-ms: ${OUTBOX_PUBLISH_INTERVAL_MS:1000}
+    batch-size: ${OUTBOX_BATCH_SIZE:100}
+    send-timeout: ${OUTBOX_SEND_TIMEOUT:PT5S}
+    max-attempts: ${OUTBOX_MAX_ATTEMPTS:10}
+    base-backoff: ${OUTBOX_BASE_BACKOFF:PT1S}
+    max-backoff: ${OUTBOX_MAX_BACKOFF:PT2M}
+
+logging:
+  level:
+    root: INFO
+    org.flywaydb: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+    # Hibernate SQL + bound params (dev only, can leak secrets!)
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
+    org.hibernate.orm.jdbc.extract: WARN
+
+    # your app
+    com.github.dimitryivaniuta.gateway: DEBUG
+
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSX} %-5level [%thread] %logger{36} correlationId=%X{correlationId} - %msg%n"
