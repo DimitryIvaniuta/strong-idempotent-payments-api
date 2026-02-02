@@ -3,6 +3,8 @@ package com.github.dimitryivaniuta.gateway.payments.service;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +44,14 @@ public class PostgresAdvisoryLockService {
      */
     public void lock(String scope, String idempotencyKey) {
         long lockId = toLongHash(scope + "|" + idempotencyKey);
-        jdbcTemplate.queryForObject("select pg_advisory_xact_lock(?)", Long.class, lockId);
+
+        jdbcTemplate.execute((ConnectionCallback<Void>) con -> {
+            try (var ps = con.prepareStatement("select pg_advisory_xact_lock(?)")) {
+                ps.setLong(1, lockId);
+                ps.execute();
+            }
+            return null;
+        });
     }
 
     private long toLongHash(String s) {
