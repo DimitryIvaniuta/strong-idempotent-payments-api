@@ -5,6 +5,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import static com.github.dimitryivaniuta.gateway.payments.config.CacheConfig.IDEMPOTENCY_CACHE;
+
 /**
  * Optional Redis-backed cache for completed idempotency responses.
  *
@@ -14,18 +16,13 @@ import org.springframework.stereotype.Service;
 public class IdempotencyCacheService {
 
     /**
-     * Cache name for idempotency responses.
-     */
-    public static final String CACHE_NAME = "idempotencyResponses";
-
-    /**
      * Gets a cached response if present.
      *
      * @param scope operation scope
      * @param idempotencyKey idempotency key
      * @return cached response or null
      */
-    @Cacheable(cacheNames = CACHE_NAME, key = "T(String).valueOf(#scope).concat(':').concat(#idempotencyKey)", unless = "#result == null")
+    @Cacheable(cacheNames = IDEMPOTENCY_CACHE, key = "T(String).valueOf(#scope).concat(':').concat(#idempotencyKey)", unless = "#result == null")
     public CachedIdempotencyResponse get(String scope, String idempotencyKey) {
         return null; // Spring Cache will bypass method body on cache hit.
     }
@@ -38,7 +35,7 @@ public class IdempotencyCacheService {
      * @param response cached response
      * @return response
      */
-    @CachePut(cacheNames = CACHE_NAME, key = "T(String).valueOf(#scope).concat(':').concat(#idempotencyKey)")
+    @CachePut(cacheNames = IDEMPOTENCY_CACHE, key = "T(String).valueOf(#scope).concat(':').concat(#idempotencyKey)")
     public CachedIdempotencyResponse put(String scope, String idempotencyKey, CachedIdempotencyResponse response) {
         return response;
     }
