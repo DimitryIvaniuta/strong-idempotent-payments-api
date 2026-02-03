@@ -2,9 +2,9 @@ package com.github.dimitryivaniuta.gateway.payments.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class RequestHashService {
      * @return request hash
      */
     public String hash(Object payload) {
-        try {
+                try {
             byte[] json = canonicalObjectMapper.writeValueAsBytes(payload);
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] h = digest.digest(json);

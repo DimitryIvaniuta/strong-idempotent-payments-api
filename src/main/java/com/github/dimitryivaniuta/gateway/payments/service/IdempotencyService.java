@@ -6,6 +6,7 @@ import com.github.dimitryivaniuta.gateway.payments.service.dto.IdempotentResult;
 import com.github.dimitryivaniuta.gateway.payments.web.dto.ChargeRequest;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,10 @@ import org.springframework.web.ErrorResponseException;
  * "charge with locks" part to {@link IdempotencyChargeTxService} to avoid self-invocation issues with
  * {@code @Transactional}.</p>
  */
+@Slf4j
 @Service
 public class IdempotencyService {
 
-    private final RequestHashService requestHashService;
     private final IdempotencyCacheService cacheService;
     private final AppProperties properties;
     private final IdempotencyChargeTxService txService;
@@ -33,13 +34,11 @@ public class IdempotencyService {
      * Creates the service.
      */
     public IdempotencyService(
-            RequestHashService requestHashService,
             IdempotencyCacheService cacheService,
             AppProperties properties,
             IdempotencyChargeTxService txService,
             MeterRegistry meterRegistry
     ) {
-        this.requestHashService = requestHashService;
         this.cacheService = cacheService;
         this.properties = properties;
         this.txService = txService;
@@ -52,12 +51,12 @@ public class IdempotencyService {
      * Executes a charge idempotently.
      *
      * @param idempotencyKey key
-     * @param request request payload
+     * @param request        request payload
      * @return result containing HTTP status + response JSON + replay flag
      */
-    public IdempotentResult charge(String idempotencyKey, ChargeRequest request) {
+    public IdempotentResult charge(String idempotencyKey, String requestHash, ChargeRequest request) {
         String scope = properties.getIdempotency().getChargeScope();
-        String requestHash = requestHashService.hash(request);
+        // requestHash is computed once at the HTTP edge to avoid double hashing.
 
         // Fast path: Redis cache (optimization)
         CachedIdempotencyResponse cached = cacheService.get(scope, idempotencyKey);

@@ -39,7 +39,7 @@ public class PostgresAdvisoryLockService {
     /**
      * Acquires a transaction-scoped advisory lock for the given scope and idempotency key.
      *
-     * @param scope operation scope
+     * @param scope          operation scope
      * @param idempotencyKey client-provided key
      */
     public void lock(String scope, String idempotencyKey) {

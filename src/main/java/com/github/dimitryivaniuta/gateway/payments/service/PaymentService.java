@@ -11,6 +11,7 @@ import com.github.dimitryivaniuta.gateway.payments.web.dto.ChargeRequest;
 import com.github.dimitryivaniuta.gateway.payments.web.dto.PaymentResponse;
 import java.time.Instant;
 import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,11 +68,8 @@ public class PaymentService {
         Payment existing = paymentRepository.findByIdempotencyKey(idempotencyKey).orElse(null);
         if (existing != null) {
             return PaymentResponse.from(existing);
-        }
-
-        Payment payment = paymentProcessor.authorize(idempotencyKey, request);
+        }        Payment payment = paymentProcessor.authorize(idempotencyKey, request);
         paymentRepository.save(payment);
-
         PaymentResponse response = PaymentResponse.from(payment);
 
         PaymentChargedEvent event = new PaymentChargedEvent(
@@ -94,7 +92,6 @@ public class PaymentService {
                 payment.getId(), // partition key
                 toJson(event)
         ));
-
         return response;
     }
 

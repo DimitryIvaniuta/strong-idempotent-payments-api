@@ -15,9 +15,10 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Service;
@@ -40,10 +41,9 @@ import org.springframework.web.ErrorResponseException;
  * </ul>
  * </p>
  */
+@Slf4j
 @Service
 public class IdempotencyChargeTxService {
-
-    private static final Logger log = LoggerFactory.getLogger(IdempotencyChargeTxService.class);
 
     private final IdempotencyRecordRepository idempotencyRecordRepository;
     private final PaymentRepository paymentRepository;
@@ -92,13 +92,13 @@ public class IdempotencyChargeTxService {
      * <p>Important: this method MUST be invoked via Spring proxy (i.e., from another bean),
      * otherwise the transaction will not be started and {@code FOR UPDATE} / advisory locks will fail.</p>
      *
-     * @param scope idempotency scope
+     * @param scope          idempotency scope
      * @param idempotencyKey idempotency key
-     * @param requestHash request hash
-     * @param request request payload
+     * @param requestHash    request hash
+     * @param request        request payload
      * @return idempotent result
      */
-@Transactional
+    @Transactional
     public IdempotentResult chargeWithDbLock(String scope, String idempotencyKey, String requestHash, ChargeRequest request) {
         advisoryLockService.lock(scope, idempotencyKey);
 

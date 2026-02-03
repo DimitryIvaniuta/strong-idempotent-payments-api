@@ -4,9 +4,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -20,10 +22,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class CorrelationIdFilter extends OncePerRequestFilter {
 
-    /** Header name for correlation id. */
+    /**
+     * Header name for correlation id.
+     */
     public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
 
-    /** MDC key. */
+    /**
+     * MDC key.
+     */
     public static final String MDC_KEY = "correlationId";
 
     @Override

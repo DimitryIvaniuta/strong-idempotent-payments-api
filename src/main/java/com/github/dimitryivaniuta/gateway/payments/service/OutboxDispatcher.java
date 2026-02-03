@@ -6,10 +6,12 @@ import com.github.dimitryivaniuta.gateway.payments.domain.OutboxStatus;
 import com.github.dimitryivaniuta.gateway.payments.repo.OutboxEventRepository;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -44,9 +46,9 @@ public class OutboxDispatcher {
      * Creates the dispatcher.
      *
      * @param outboxEventRepository repo
-     * @param kafkaTemplate template
-     * @param properties app properties
-     * @param meterRegistry metrics
+     * @param kafkaTemplate         template
+     * @param properties            app properties
+     * @param meterRegistry         metrics
      */
     public OutboxDispatcher(
             OutboxEventRepository outboxEventRepository,
